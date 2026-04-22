@@ -17,11 +17,11 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private static final Logger logger = LoggerFactory.getLogger(CustomAuthenticationEntryPoint.class);
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) 
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
-        
+
         logger.warn("Unauthorized access attempt: {} - {}", request.getRequestURI(), authException.getMessage());
-        
+
         // Send HTTP 401 Unauthorized response
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized: Access Token is missing or invalid.");
     }

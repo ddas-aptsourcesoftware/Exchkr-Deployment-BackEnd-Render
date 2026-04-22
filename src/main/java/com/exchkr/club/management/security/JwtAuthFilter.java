@@ -4,7 +4,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.exchkr.club.management.dao.TokenBlacklistRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,32 +26,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final TokenBlacklistRepository tokenBlacklistRepository;
 
-    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
-
     public JwtAuthFilter(JwtUtil jwtUtil, TokenBlacklistRepository tokenBlacklistRepository) {
         this.jwtUtil = jwtUtil;
         this.tokenBlacklistRepository = tokenBlacklistRepository;
     }
 
-    // =========================================================
-    // SKIP JWT FILTER FOR STRIPE WEBHOOKS
-    // =========================================================
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/webhook/stripe/");
     }
-    // =========================================================
 
-    private String extractJwtFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
+    // NOW USING Authorization HEADER
+    private String extractJwt(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
 
-        return Arrays.stream(cookies)
-                .filter(cookie -> ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+
+        return null;
     }
 
     @Override
@@ -62,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String jwt = extractJwtFromCookie(request);
+        String jwt = extractJwt(request);
 
         if (jwt != null) {
             try {
@@ -70,7 +62,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                     String jti = jwtUtil.extractJti(jwt);
 
-                    // Blacklist check
                     if (jti != null && tokenBlacklistRepository.existsById(jti)) {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         return;
@@ -94,8 +85,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                         UsernamePasswordAuthenticationToken authToken =
                                 new UsernamePasswordAuthenticationToken(
-                                        userDetails, null, authorities
+                                        userDetails,
+                                        null,
+                                        authorities
                                 );
+
+                        // IMPORTANT FIX
+                        authToken.setDetails(userDetails);
 
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }

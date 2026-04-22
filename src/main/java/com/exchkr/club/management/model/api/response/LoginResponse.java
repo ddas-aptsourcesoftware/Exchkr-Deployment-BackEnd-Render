@@ -6,9 +6,13 @@ import java.util.List;
 
 public class LoginResponse {
     private String message;
-    private UserDTO user; 
+    private UserDTO user;
     private List<UserClubMembershipProjection> availableClubs; // For Phase 1 of login
     private Long userId; // To pass back to the frontend for Phase 2 of login
+
+    private String accessToken;
+    private String refreshToken;
+
 
     // Constructor for Phase 1 (Credentials OK, pick a club)
     public LoginResponse(String message, List<UserClubMembershipProjection> clubs, Long userId) {
@@ -18,9 +22,11 @@ public class LoginResponse {
     }
 
     // Constructor for Phase 2 (Club selected, login complete)
-    public LoginResponse(String message, UserDTO user) {
+    public LoginResponse(String message, UserDTO user, String accessToken, String refreshToken) {
         this.message = message;
         this.user = user;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     public LoginResponse() {}
@@ -33,4 +39,8 @@ public class LoginResponse {
     public void setAvailableClubs(List<UserClubMembershipProjection> availableClubs) { this.availableClubs = availableClubs; }
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
+    public String getAccessToken() { return accessToken; }
+    public void setAccessToken(String accessToken) { this.accessToken = accessToken; }
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 }

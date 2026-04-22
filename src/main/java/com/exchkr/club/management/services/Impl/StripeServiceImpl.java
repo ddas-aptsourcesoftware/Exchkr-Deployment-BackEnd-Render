@@ -8,6 +8,7 @@ import java.util.*;
 import com.exchkr.club.management.model.api.response.StripeAccountResponse;
 import com.stripe.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class StripeServiceImpl implements StripeService {
 
     @Autowired
     private StripeRepository stripeRepository;
+
+    @Value("${app.frontend.base-url}")
+    private String frontendBaseUrl;
 
     @Override
     public StripeResponse createAccountAndOnboard(long userId, long clubId) throws StripeException {
@@ -53,11 +57,14 @@ public class StripeServiceImpl implements StripeService {
             stripeRepository.createAccount(clubId, stripeAccountId);
         }
 
+        String refreshUrl = frontendBaseUrl + "/club-officer/members";
+        String returnUrl  = frontendBaseUrl + "/club-officer/members";
+
         // Generate onboarding link
         Map<String, Object> linkParams = new HashMap<>();
         linkParams.put("account", stripeAccountId);
-        linkParams.put("refresh_url", "https://aptcarep.com/club-officer/members");
-        linkParams.put("return_url", "https://aptcarep.com/club-officer/members");
+        linkParams.put("refresh_url", refreshUrl);
+        linkParams.put("return_url", returnUrl);
         linkParams.put("type", "account_onboarding");
 
         AccountLink link = AccountLink.create(linkParams);
@@ -331,10 +338,13 @@ public class StripeServiceImpl implements StripeService {
             stripeRepository.createMemberAccount(userId, stripeAccountId);
         }
 
+        String refreshUrl = frontendBaseUrl + "/club-member/payments";
+        String returnUrl  = frontendBaseUrl + "/club-member/payments";
+
         Map<String, Object> linkParams = new HashMap<>();
         linkParams.put("account", stripeAccountId);
-        linkParams.put("refresh_url", "https://aptcarep.com/club-member/payments");
-        linkParams.put("return_url", "https://aptcarep.com/club-member/payments");
+        linkParams.put("refresh_url", refreshUrl);
+        linkParams.put("return_url", returnUrl);
         linkParams.put("type", "account_onboarding");
 
         AccountLink link = AccountLink.create(linkParams);
