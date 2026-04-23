@@ -15,7 +15,7 @@ public class StripeConfig {
     public void init() {
 
         if (stripeSecretKey == null || stripeSecretKey.isBlank()) {
-            throw new IllegalStateException("❌ Stripe secret key is NOT configured!");
+            throw new IllegalStateException("Stripe secret key is NOT configured!");
         }
 
         Stripe.apiKey = stripeSecretKey;

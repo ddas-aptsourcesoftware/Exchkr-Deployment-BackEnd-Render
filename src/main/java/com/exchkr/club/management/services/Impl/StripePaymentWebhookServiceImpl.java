@@ -49,10 +49,10 @@ public class StripePaymentWebhookServiceImpl implements StripePaymentWebhookServ
 				handlePaymentIntent(event);
 				break;
 			default:
-				logger.info("ℹ️ Payment event ignored: {}", event.getType());
+				logger.info("Payment event ignored: {}", event.getType());
 			}
 		} catch (Exception e) {
-			logger.error("❌ Error processing Stripe event: {}", event.getType(), e);
+			logger.error("Error processing Stripe event: {}", event.getType(), e);
 			throw e;
 		}
 	}
@@ -77,7 +77,11 @@ public class StripePaymentWebhookServiceImpl implements StripePaymentWebhookServ
 
 		if (txOpt.isEmpty()) {
 			logger.warn("No transaction found for StripeRefId: {}. Webhook will be ignored.", stripeRefId);
-			return;
+
+            // Throw exception so controller returns 500
+            throw new IllegalStateException(
+                    "Transaction not yet available for StripeRefId: " + stripeRefId
+            );
 		}
 
 		logger.info("Transaction found for StripeRefId: {}", stripeRefId);
@@ -132,12 +136,12 @@ public class StripePaymentWebhookServiceImpl implements StripePaymentWebhookServ
 //		// to commit
 //		if (reimbursementOpt.isEmpty()) {
 //			try {
-//				logger.info("⏱️ Reimbursement record not found for Stripe Ref: {}. Waiting 1.5s for DB commit...",
+//				logger.info("Reimbursement record not found for Stripe Ref: {}. Waiting 1.5s for DB commit...",
 //						stripeRefId);
 //				Thread.sleep(1500); // 1.5 second delay
 //				reimbursementOpt = reimbursementRepository.findByStripeRefId(stripeRefId);
 //			} catch (InterruptedException e) {
-//				logger.error("❌ Retry sleep interrupted", e);
+//				logger.error("Retry sleep interrupted", e);
 //				Thread.currentThread().interrupt();
 //			}
 //		}
@@ -148,31 +152,31 @@ public class StripePaymentWebhookServiceImpl implements StripePaymentWebhookServ
 //
 //			// Idempotency check: Avoid double-processing if Stripe sends the webhook twice
 //			if ("PAID".equalsIgnoreCase(reimbursement.getStatus())) {
-//				logger.info("ℹ️ Reimbursement ID: {} is already PAID. Skipping.", reimbursement.getReimbursementId());
+//				logger.info("Reimbursement ID: {} is already PAID. Skipping.", reimbursement.getReimbursementId());
 //				return;
 //			}
 //
 //			// 4. Update Reimbursement Status
 //			reimbursement.setStatus("PAID");
 //			reimbursementRepository.save(reimbursement);
-//			logger.info("✅ Reimbursement ID: {} marked as PAID via Webhook", reimbursement.getReimbursementId());
+//			logger.info("Reimbursement ID: {} marked as PAID via Webhook", reimbursement.getReimbursementId());
 //
 //			// 5. Update the Budget Category Spent Amount
 //			int currentYear = java.time.LocalDate.now().getYear();
 //			try {
 //				budgetRepository.updateSpentAmount(reimbursement.getClubId(), currentYear, reimbursement.getCategory(),
 //						amount);
-//				logger.info("📊 Budget updated: Club {}, Category '{}', Added: {}", reimbursement.getClubId(),
+//				logger.info("Budget updated: Club {}, Category '{}', Added: {}", reimbursement.getClubId(),
 //						reimbursement.getCategory(), amount);
 //			} catch (Exception e) {
 //				// Log error but don't fail the payment processing
-//				logger.error("❌ Failed to update budget for reimbursement ID: {}", reimbursement.getReimbursementId(),
+//				logger.error("Failed to update budget for reimbursement ID: {}", reimbursement.getReimbursementId(),
 //						e);
 //			}
 //
 //		} else {
 //			// 6. Hard Failure: Tell Stripe to retry later
-//			logger.error("❌ Webhook Error: No matching Reimbursement found for Stripe Ref: {} after retry.",
+//			logger.error("Webhook Error: No matching Reimbursement found for Stripe Ref: {} after retry.",
 //					stripeRefId);
 //			// Throwing an exception here ensures Stripe receives a 500 error and retries
 //			// later

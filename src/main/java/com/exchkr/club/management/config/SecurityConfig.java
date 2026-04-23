@@ -49,7 +49,7 @@ public class SecurityConfig {
                 // 1. CORS Configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // ✅ EXPLICITLY DISABLE CSRF (IMPORTANT)
+                // EXPLICITLY DISABLE CSRF (IMPORTANT)
                 .csrf(csrf -> csrf.disable())
 
                 // 2. Stateless session (JWT)
@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**", "/auth/refresh-token", "/api/admin/onboarding/**",
                                 "/api/finance/stripe-webhook", "/error", "/webhook/stripe/account/**",
                                 "/webhook/stripe/payment/**", "/api/webhook/plaid/**", "/api/donation/**",
-                                "/api/unit/identity", "/api/unit/applications/**", "/webhook/unit/**")
+                                "/api/unit/identity", "/api/unit/applications/**", "/webhook/unit/**", "/api/password/reset")
                         .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/plaid/**").hasAuthority("ROLE_Officer")

@@ -14,14 +14,14 @@ public class StripeWebhookConfig {
 
     public String getAccountWebhookSecret() {
         if (accountWebhookSecret == null || accountWebhookSecret.isBlank()) {
-            throw new IllegalStateException("❌ Stripe Account Webhook secret is NOT configured!");
+            throw new IllegalStateException("Stripe Account Webhook secret is NOT configured!");
         }
         return accountWebhookSecret;
     }
 
     public String getPaymentWebhookSecret() {
         if (paymentWebhookSecret == null || paymentWebhookSecret.isBlank()) {
-            throw new IllegalStateException("❌ Stripe Payment Webhook secret is NOT configured!");
+            throw new IllegalStateException("Stripe Payment Webhook secret is NOT configured!");
         }
         return paymentWebhookSecret;
     }

@@ -38,11 +38,11 @@ public class StripeAccountWebhookController {
             return ResponseEntity.ok().build();
 
         } catch (SignatureVerificationException e) {
-            // ❌ Invalid signature
+            // Invalid signature
             return ResponseEntity.badRequest().build();
 
         } catch (Exception e) {
-            // ❌ Processing failure → Stripe retries
+            // Processing failure → Stripe retries
             return ResponseEntity.internalServerError().build();
         }
     }

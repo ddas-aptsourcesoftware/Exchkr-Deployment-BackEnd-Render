@@ -21,8 +21,8 @@ public class StripePaymentWebhookController {
 
     @PostMapping
     public ResponseEntity<Void> handlePaymentWebhook(
-            @RequestBody String payload,                        // ✅ CHANGE #1: RAW BODY
-            @RequestHeader("Stripe-Signature") String sigHeader  // ✅ Stripe signature
+            @RequestBody String payload,                        // CHANGE #1: RAW BODY
+            @RequestHeader("Stripe-Signature") String sigHeader  // Stripe signature
     ) {
         try {
             // Verify Stripe signature
@@ -35,15 +35,15 @@ public class StripePaymentWebhookController {
             // Delegate processing to service layer
             paymentWebhookService.processEvent(event);
 
-            // ✅ 200 OK → Stripe marks webhook as delivered
+            // 200 OK → Stripe marks webhook as delivered
             return ResponseEntity.ok().build();
 
         } catch (SignatureVerificationException e) {
-            // ❌ Invalid signature → Stripe retries or flags endpoint
+            // Invalid signature → Stripe retries or flags endpoint
             return ResponseEntity.badRequest().build();
 
         } catch (Exception e) {
-            // ❌ Processing failure → Stripe retries
+            // Processing failure → Stripe retries
             return ResponseEntity.internalServerError().build();
         }
     }
